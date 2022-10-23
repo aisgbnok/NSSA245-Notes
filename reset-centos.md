@@ -1,146 +1,94 @@
 # Reset CentOS Linux 7 to CentOS Stream 9
 
-## 1. During Deployment (Recommended)
+## 0. Update CentOS Linux 7 (Optional)
 
-> **Note**\
-> This doesn't seem to be an option for the CentOS7_netB machines.
-
-1. When requesting the NSSA 245 deployment navigate to the "CentOS7" Machine.
-2. On the "General" tab, set memory to `4096` or the maximum value possible.
-3. Edit the description as you see fit, reconfiguration is not possible later.
-4. Navigate to the "Storage" tab.
-5. Select the **➕ New** button, set the capacity to `12`GB and the label to `Image`, and then select **Ok**.
-6. Select **SUBMIT** in the bottom left to start deployment.
-
-## 1. Create Partition
-
-### Resize CentOS Home Volume
-
-1. Log out of the **student** account and login as *root*.
-   To do this click **Not Listed?** on the home screen.
-1. XFS file systems cannot be shrunk, therefore we need to wipe and reconfigure the `centos-home` volume.
-1. Open a Terminal and backup the `/home` contents.
-   ```shell
-   tar -czvf /root/home.tgz -C /home .
-   ```
-1. Test the backup of the home directory.
-   ```shell
-   tar -tvf /root/home.tgz
-   ```
-1. Unmount `/home`.
-   ```shell
-   umount /dev/mapper/centos-home
-   ```
-1. Remove the `/home` logical volume.
-   ```shell
-   lvremove /dev/mapper/centos-home
-   ```
-1. Recreate the `/home` logical volume with a size of `38GB`, this leaves ~12 for the partition we will be making later.
-   ```shell
-   lvcreate -L 38GB -n home centos
-   ```
-1. Format and mount the new `/home` volume.
-   ```shell
-   mkfs.xfs /dev/centos/home
-   mount /dev/mapper/centos-home
-   ```
-1. Restore the backup of `/home`.
-   ```shell
-   tar -xzvf /root/home.tgz -C /home
-   ```
-1. Reset security context of the `/home` contents using `restorecon`
-   ```shell
-   restorecon -R -v /home
-   ```
-1. Log out of the **root** user and sign back in as **student**.
-1. Now that we have verified that the **student** account is working again we can delete the backup.
-   ```shell
-   sudo rm /root/home.tgz
-   ```
-### Add New Volume
-
-
-
-
-## 2. Connect CentOS Linux 7 to Network
-
-1. First identify what side of the Pfsense Router your machine is attached to. Either NetA or NetB.
-1. Open the Wired Network settings and set the IPV4 method to **Manual**.
-1. Set the Address to `10.x.255.yyy`, the Netmask to `255.255.0.0`, and the Gateway to `10.x.255.254`.
-   `x` being `1` for NetA and `2` for NetB, you can choose `yyy` but don't use the same value for every machine.
-1. Set the DNS to `1.1.1.1` and turn off Automatic DNS.
-1. Refresh the Wired Network by rebooting the machine.
-   This seems to produce better results that simply turning the Wired connection on and off.
-
-## 3. Update CentOS Linux 7 (Optional)
-
-1. Open a Terminal in CentOS 7 and clean the yum cache.
+1. Open a Terminal instance and clean the yum cache.
     ```shell
     sudo yum clean all
     ```
-1. Update all packages using yum.
-   If the yum repos can't be resolved then reboot the machine and start over at step 1.
+2. Using the yum package manager, upgrade all packages.
+   *If the yum repos can't be resolved then reboot and start over at step 1.*
    ```shell
    sudo yum upgrade -y
    ```
-1. Wait for CentOS to upgrade all packages and then reboot the machine.
-   ```shell
-    reboot
-   ```
-1. It is recommended, but not required, to clean the yum cache again.
+3. Once complete it is recommended, but not required, to clean the yum cache again.
    ```shell
     sudo yum clean all
    ```
+4. Finally, reboot the machine.
+   ```shell
+    reboot
+   ```
 
-## 4. Download CentOS Stream 9 ISO
+## 1. Download CentOS Stream 9 ISO
 
-1. Open Firefox and then go to [`https://centos.org/download/`](https://centos.org/download/).
-1. Select **CentOS Stream**, then select **9**, and then select **x86_64**.
+1. Open a browser and then go to [`https://centos.org/download/`](https://centos.org/download/).
+   *If the URL fails to resolve then reboot and try again.*
+2. Select **CentOS Stream**, select **9**, and then select **x86_64**.
    Alternatively you can [select or go to this download link](https://mirrors.centos.org/mirrorlist?path=/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-dvd1.iso&redirect=1&protocol=https) on the machine.
-1. Save the file to your downloads.
+3. Save the file to your downloads directory.
 
-## 5. Prepare the CentOS 9 ISO for booting
+## 2. Prepare the CentOS 9 ISO for booting
 
-We need to unpack the CentOS Stream 9 ISO onto the "Image" drive we created during deployment.
-We can then boot from the "Image" drive and install CentOS Stream 9 in the place of CentOS 7.
+We need to unpack the CentOS Stream 9 ISO onto the "Installer" drive we created during deployment.
+We can then boot from the "Installer" drive and install CentOS Stream 9 in the place of CentOS 7.
+*This will completely wipe CentOS Linux 7.*
 
-1. First we need to mount and prepare the empty drive.
+1. Use the `fdisk` program to list all partition tables.
    ```shell
    sudo fdisk -l
    ```
-1. Find the ~`12`GB Disk we created during deployment, most likely labelled as `/dev/sdc`.
-1. Format the new drive using the correct label such as `/dev/sdc`.
-```shell
-sudo mkfs -t ext4 /dev/sdc
-```
-1. Unpack the CentOS Stream 9 ISO onto the new drive.
+2. Find the `/dev/sdb` Disk, it should be about `12.9`GB in size.
+   This is the `Installer` drive we added during deployment.
+3. Unpack the CentOS Stream 9 ISO onto the new drive.
    Make sure to set `if=` to the path of the ISO and `of=` to the correct drive.
    ```shell
-   sudo dd if=/home/student/Downloads/CentOS-Stream-9-latest-x86_64-dvd1.iso of=/dev/sdc bs=512k status=progress
+   sudo dd if=/home/student/Downloads/CentOS-Stream-9-latest-x86_64-dvd1.iso of=/dev/sdb bs=512k status=progress
    ```
-   
-## 6. Add the CentOS Stream 9 Bootable Disk to the Grub Menu
 
-```shell
-sudo vim /etc/grub.d/40_custom
-```
-```shell
-menuentry "CentOS Stream 9 Installer" {
-  set root=(hd2)
-  drivemap -s hd0 hd2
-  chainloader +1
-}
-```
-```shell
-sudo grub2-mkconfig -o /boot/grub2/grub.cfg
-```
-```shell
-reboot
-```
-1. Select **CentOS Stream 9 Installer** during boot.
+## 3. Add the CentOS Stream 9 Bootable Disk to the Grub2 Menu
 
-### 7. Install CentOS Stream 9
+1. Create a custom grub menu entry.
+   We will create a `40_custom` file to do this.
+   ```shell
+   sudo vim /etc/grub.d/40_custom
+   ```
+2. Press <kbd>i</kbd> and then navigate to the end of the file.
+3. Go down two spaces, leaving a single empty space between the last comment.
+4. Enter the following.
+   ```text
+   menuentry "CentOS Stream 9 Installer" {
+     set root=(hd1)
+     drivemap -s hd0 hd1
+     chainloader +1
+   }
+   ```
+5. Save and exit the file. <kbd>ESC</kbd><kbd>:</kbd><kbd>w</kbd><kbd>q</kbd><kbd>ENTER</kbd>
+6. Rebuild the grub2 menu.
+   ```shell
+   sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+   ```
+7. Reboot the machine.
+   ```shell
+   reboot
+   ```
 
-1. 
+## 4. Install CentOS Stream 9
 
+1. During boot, select the **CentOS Stream 9 Installer** entry we just created.
+2. Select **Install CentOS Stream 9**.
+3. Choose your language and then select **Continue**.
+4. Select **Installation Destination** and then select **Done** in the top left corner.
+5. Select **Reclaim space**, select **Delete all**, and then select **Reclaim space**.
+6. Select **Root Password** and then choose a root password, select **Done** when satisfied.
+   *Security is not an important factor for these labs, so I chose `student` as the password.*
+7. Select **Begin Installation** to start the installation process.
+8. Once complete, select **Reboot System**.
 
+## 5. Setup CentOS Stream 9
+
+1. Select **Start Setup**, disable Location Services, select **Next**, then select **Skip**.
+2. Use the Full Name you entered into the description during deployment.
+   I chose `Student`. Select **Next**.
+3. Similarly, use the Password you chose. I chose `student`. Select **Next**.
+4. Select **Start Using CentOS Stream**.
