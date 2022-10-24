@@ -45,13 +45,16 @@ def add_boot_option():
     """
     print('Adding boot option...')
     # Write the custom grub config
-    f = open('/etc/grub.d/40_custom', 'w')
-    f.write('menuentry "CentOS Stream 9 Installer" {\n')
-    f.write('\tset root=(hd1)\n')
-    f.write('\tdrivemap -s hd0 hd1\n')
-    f.write('\tchainloader +1\n')
-    f.write('}')
-    f.close()
+    menuentry = open('/etc/grub.d/40_custom', 'w')
+    menuentry.write(''.join(['#!/user/bin/sh\n',
+                             'exec tail -n +3 $0\n\n',
+                             'menuentry "CentOS Stream 9 Installer" {\n',
+                             '\tset root=(hd1)\n',
+                             '\tdrivemap -s hd0 hd1\n',
+                             '\tchainloader +1\n',
+                             '}'
+                             ]))
+    menuentry.close()
 
     # Update grub
     call('grub2-mkconfig -o /boot/grub2/grub.cfg', shell=True)
@@ -82,14 +85,14 @@ def main():
     else:
         print('\nSkipping download...')
         print(f'Please ensure the ISO is located at /tmp/{CENTOS_ISO}.')
-        input("Press Enter to continue...")
+        input('Press Enter to continue...')
 
     # Configure the ISO for booting
     unpack_iso()
     add_boot_option()
 
     # Reboot
-    print('Rebooting...')
+    input('Press Enter to reboot...')
     call('reboot', shell=True)
 
 
