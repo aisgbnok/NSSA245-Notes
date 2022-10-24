@@ -78,11 +78,11 @@ def main():
     # Ask to skip downloading the ISO
     skip_download = input('Skip downloading the ISO? [y/N] ')
     if skip_download.lower() != 'y':
+        download_iso()
+    else:
         print('\nSkipping download...')
         print(f'Please ensure the ISO is located at /tmp/{CENTOS_ISO}.')
         input("Press Enter to continue...")
-    else:
-        download_iso()
 
     # Configure the ISO for booting
     unpack_iso()
