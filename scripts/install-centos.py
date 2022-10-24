@@ -67,8 +67,24 @@ def main():
     :return: None
     """
     print('Warning: This script will overwrite /dev/sdb.')
-    print('Warning: Use this script at your own risk.')
-    download_iso()
+    print('Warning: Use this script at your own risk.\n')
+
+    # Ask for confirmation
+    confirm = input('Continue? [y/N] ')
+    if confirm.lower() != 'y':
+        print('Exiting...')
+        exit(0)
+
+    # Ask to skip downloading the ISO
+    skip_download = input('Skip downloading the ISO? [y/N] ')
+    if skip_download.lower() != 'y':
+        print('\nSkipping download...')
+        print(f'Please ensure the ISO is located at /tmp/{CENTOS_ISO}.')
+        input("Press Enter to continue...")
+    else:
+        download_iso()
+
+    # Configure the ISO for booting
     unpack_iso()
     add_boot_option()
 
