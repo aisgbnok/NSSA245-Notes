@@ -28,7 +28,7 @@
 > This script is provided as-is and is not supported by the CentOS Project.
 > Use at your own risk.
 
-Running the `install-centos.py` script will perform steps 1-3 automatically.
+Running the [`install-centos.py`](/scripts/install-centos.py) script will perform steps 1-3 automatically.
 
 1. Install `git` and `python3`.
     ```shell

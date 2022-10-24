@@ -46,7 +46,7 @@ def add_boot_option():
     print('Adding boot option...')
     # Write the custom grub config
     menuentry = open('/etc/grub.d/40_custom', 'w')
-    menuentry.write(''.join(['#!/user/bin/sh\n',
+    menuentry.write(''.join(['#!/usr/bin/sh\n',
                              'exec tail -n +3 $0\n\n',
                              'menuentry "CentOS Stream 9 Installer" {\n',
                              '\tset root=(hd1)\n',
