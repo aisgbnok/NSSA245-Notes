@@ -56,6 +56,15 @@ def add_boot_option():
                              ]))
     menuentry.close()
 
+    # Ensuring probing is disabled on CentOS Stream 9
+    disable_prob = 'GRUB_DISABLE_OS_PROBER=true'
+    with open('/etc/default/grub', 'r+') as grub_defaults:
+        for line in grub_defaults:
+            if disable_prob in line:
+                break
+        else:  # Not found, end of file
+            grub_defaults.write(disable_prob + '\n')
+
     # Update grub
     call('grub2-mkconfig -o /boot/grub2/grub.cfg', shell=True)
 
