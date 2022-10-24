@@ -19,6 +19,31 @@
    ```shell
     reboot
    ```
+   
+## 0. Script
+
+> **Warning**\
+> This script can damage your system.
+> This script will overwrite /dev/sdb.
+> This script is provided as-is and is not supported by the CentOS Project.
+> Use at your own risk.
+
+Running the `install-centos.py` script will perform steps 1-3 automatically.
+
+1. Install `git` and `python3`.
+    ```shell
+    sudo yum install -y git python3
+    ```
+2. Clone this repository.
+    ```shell
+    git clone https://github.com/aisgbnok/NSSA245-Notes.git
+    ```
+3. Run the `install-centos.py` script.
+    ```shell
+    cd NSSA245-Notes/scripts/
+    sudo python3 install-centos.py
+    ```
+4. Skip to step [4. Install CentOS Stream 9](#4-install-centos-stream-9).
 
 ## 1. Download CentOS Stream 9 ISO
 
@@ -53,8 +78,8 @@ We can then boot from the "Installer" drive and install CentOS Stream 9 in the p
    ```shell
    sudo vim /etc/grub.d/40_custom
    ```
-2. Press <kbd>i</kbd> and then navigate to the end of the file.
-3. Go down two spaces, leaving a single empty space between the last comment.
+2. Press <kbd>i</kbd> and <kbd>CTRL</kbd>+<kbd>END</kbd> to navigate to the end of the file.
+3. Enter two spaces, leaving a single empty space between the last comment.
 4. Enter the following.
    ```text
    menuentry "CentOS Stream 9 Installer" {
