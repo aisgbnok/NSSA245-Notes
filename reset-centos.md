@@ -100,6 +100,17 @@ We can then boot from the "Installer" drive and install CentOS Stream 9 in the p
 
 ## 4. Install CentOS Stream 9
 
+> **Note**\
+> If the grub menu does not appear:
+> 
+> 1. Reboot the machine.
+> 2. Continuously press <kbd>F2</kbd> until you enter the VMware BIOS.
+> 3. Navigate to the **Boot** tab, and then reorder the **Hard Drive** to ensure **(0:1)** is first.
+> 4. **Exit** > **Exit Saving Changes**.
+> 5. Skip the following Step 1.
+> 
+> You have to undo this change after the installation is complete.
+
 1. During boot, select the **CentOS Stream 9 Installer** entry we just created.
 2. Select **Install CentOS Stream 9**.
 3. Choose your language and then select **Continue**.
@@ -115,5 +126,6 @@ We can then boot from the "Installer" drive and install CentOS Stream 9 in the p
 1. Select **Start Setup**, disable Location Services, select **Next**, then select **Skip**.
 2. Use the Full Name you entered into the description during deployment.
    I chose `Student`. Select **Next**.
-3. Similarly, use the Password you chose. I chose `student`. Select **Next**.
+3. Similarly, use the Password you chose.
+   I chose `student`. Select **Next**.
 4. Select **Start Using CentOS Stream**.
